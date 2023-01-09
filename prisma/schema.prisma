@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JOB_LOCATION {
+  bury
+  bolton
+  manchester
+  oldham
+  rochdale
+  salford
+  stockport
+  tameside
+  trafford
+  wigan
+}
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  password  String
+  jobs      Job[]
+}
+
+model Job {
+  id              String       @id @default(uuid())
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt()
+  title           String       @db.VarChar(255)
+  company         String
+  experienceLevel String
+  companyWebsite  String
+  location        JOB_LOCATION
+  description     String
+  contactEmail    String
+  applyLink       String
+  expiresOn       DateTime     @default(dbgenerated("NOW() + interval '30 days'"))
+  published       Boolean      @default(false)
+  viewCount       Int          @default(0)
+  belongsToId     String
+  belongsTo       User         @relation(fields: [belongsToId], references: [id],  onDelete: Cascade)
+
+  @@unique([id, belongsToId])
+}
